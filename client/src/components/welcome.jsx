@@ -1,0 +1,137 @@
+import React, { useContext, useState } from "react";
+import { AiFillMacCommand, AiFillMessage, AiFillMoneyCollect, AiOutlineNumber } from "react-icons/ai";
+import { SiContactlesspayment, SiEthereum, SiHandshakeProtocol } from "react-icons/si";
+import { BsInfoCircle } from "react-icons/bs";
+import Recaptcha from "react-recaptcha";
+import { TransactionContext } from "../context/TransactionContext";
+import { Loader } from "."; // loading animation
+
+const Input = ({ placeholder, name, type, value, handleChange }) => (
+  <input
+    placeholder={placeholder}
+    type={type}
+    step="0.01"
+    value={value}
+    onChange={(e) => handleChange(e, name)}
+    className="my-3 w-full rounded-m p-2 rounded-full border-2 text-black font-bold text-sm white-glassmorphism"
+  />
+);
+
+const Welcome = () => {
+  
+  const { connectWallet, currentAccount, formData, sendTransaction, handleChange, isLoading, GetBalance, Balance, refreshPage } = useContext(TransactionContext);
+  const [payLock, setPayLock] = useState(true);
+
+  var callback = function () {
+    console.log("Done!!!!");
+  };
+  var verifyCallback = function (response) {
+    if (response) {
+      setPayLock(false);
+    }
+  };
+
+  const handleSubmit = (e) => {
+    const { addressTo, amount, message, currency } = formData;
+    e.preventDefault(); // Prevent the page from reloading upon form submission
+    if (!addressTo || !amount || !message || !currency){
+
+
+      alert('Pls write anything');
+      return;
+
+    } 
+
+    // if (!payLock) {
+      console.log("Verify he");
+      sendTransaction();
+    // } else {
+    //   alert("Complete the captcha to complete the payment");
+    // }
+  };
+
+  return (
+
+        <div className="bg-gray-700 flex flex-col flex-1 items-center justify-start w-full">
+
+          {!currentAccount ? (
+            <button
+              type="button"
+              onClick={connectWallet}
+              className="flex flex-row justify-center itmes-center my-5 bg-[#ffffff] p-3 rounded-full cursor-pointer hover:bg-[#99ff33]"
+            >
+              Connect Wallet & DONATE
+            </button>
+          ) : (
+            <>
+              <div className="p-4 justify-end items-start flex-col eth-card rounded-xl h-80 sm:w-72 w-full my-6">
+                <div className="flex justify-between flex-col w-full h-full">
+                  <div className="flex justify-between items-start">
+                    <div className="w-20 h-10 border-white flex justify-center items-center">
+                      <SiContactlesspayment fontSize={67} color="white" />
+                    </div>
+                    <BsInfoCircle fontSize={25} color="white" />
+                  </div>
+                  <div className="w-100 h-20 flex justify-center items-center">
+                    <SiEthereum fontSize={107} color="white" />
+                  </div>
+                  <div>
+                    <p className="text-white text-sm justify-start">
+                      Account Address:<br></br>
+                      {currentAccount.substring(0, 32) + "..."}
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={GetBalance}
+                className="flex flex-row justify-center itmes-center my-5 bg-[#1aff1a] p-3 rounded-full cursor-pointer hover:bg-[#1ac6ff]"
+              >
+                Check Balance
+              </button>
+              <p className="text-white border-2 rounded text-sm mt-1">Balance : {Balance} ETH</p>
+              <br></br>
+              <div className="p-5 sm:w-96 w-full text-white flex flex-col justify-start items-center">
+                <SiHandshakeProtocol></SiHandshakeProtocol>Receiver's Address<Input placeholder="Account Address(0x..)" name="addressTo" type="text" handleChange={handleChange} />
+                <AiOutlineNumber></AiOutlineNumber> Amount<Input placeholder="Amount in numbers only" name="amount" type="number" handleChange={handleChange} />
+                <AiFillMoneyCollect></AiFillMoneyCollect><Input placeholder="Currency in the form(INR,USD,EUR..)" name="currency" type="text" handleChange={handleChange}/>
+                <AiFillMessage></AiFillMessage>Message<Input placeholder="Message" name="message" type="text" handleChange={handleChange} />
+                <div className="h-[1px] w-full bg-gray-400 my-2" />
+                {isLoading ? (
+                  <Loader />
+                ) : (
+                  <button
+                    type="button"
+                    onClick={handleSubmit}
+                    className="text-white w-full mt-2 border-[1px] p-2 bg-red-500 border-[#3d4f7c] hover:bg-[#1dc91d] rounded-full cursor-pointer"
+                  >
+                    Donate
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={refreshPage}
+                  className="text-white w-full mt-2 border-[1px] p-2 border-[#3d4f7c] hover:bg-red-500 bg-[#1dc91d]  rounded-full cursor-pointer"
+                >
+                  Refresh page
+                </button>
+                <br></br>
+                <Recaptcha
+                  sitekey="6Leb_IofAAAAABAhs5hp-yWXW61KKFiKtBMzQ3jd"
+                  render="explicit"
+                  verifyCallback={verifyCallback}
+                  onloadCallback={callback}
+                  type="image"
+                  theme="dark"
+                />
+                <br></br>
+              </div>
+            </>
+          )}
+          <br></br>
+        </div>
+  );
+};
+
+export default Welcome;
